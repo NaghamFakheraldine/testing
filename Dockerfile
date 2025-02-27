@@ -104,15 +104,27 @@ ARG AWS_SECRET_ACCESS_KEY
 ARG AWS_DEFAULT_REGION
 
 # Download models from S3 if credentials are provided
+# Use ARG for AWS credentials with default empty values
+ARG AWS_ACCESS_KEY_ID=""
+ARG AWS_SECRET_ACCESS_KEY=""
+ARG AWS_DEFAULT_REGION="us-east-1"
+
+# Download models from S3 if credentials are provided
 WORKDIR /comfyui
 RUN cd models/loras && \
-    if [ -n "$AWS_ACCESS_KEY_ID" ] && [ -n "$AWS_SECRET_ACCESS_KEY" ]; then \
+    if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ]; then \
+        aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} && \
+        aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY} && \
+        aws configure set default.region ${AWS_DEFAULT_REGION} && \
         aws s3 cp s3://loras-bucket/Elie_Saab/V2/ElieSaabLoraV2.safetensors . && \
         echo "Successfully downloaded from S3" || \
         echo "Failed to download from S3: $?"; \
     else \
-        echo "AWS credentials not provided, skipping S3 download"; \
+        echo "AWS credentials not provided (ACCESS_KEY: ${#AWS_ACCESS_KEY_ID} chars, SECRET_KEY: ${#AWS_SECRET_ACCESS_KEY} chars)"; \
     fi
-
+    
 # Set the start script as the container's entry point
 CMD ["/start.sh"]
+
+
+

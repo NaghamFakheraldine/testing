@@ -40,3 +40,4 @@ if [ "$SERVE_API_LOCALLY" == "true" ]; then
 else
     python3 -u handler.py
 fi
+
