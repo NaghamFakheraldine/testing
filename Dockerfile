@@ -15,6 +15,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     libgl1 \
     awscli \
+    curl \
+    libtcmalloc-minimal4 \
     && ln -sf /usr/bin/python3.10 /usr/bin/python \
     && ln -sf /usr/bin/pip3 /usr/bin/pip
 
@@ -78,8 +80,14 @@ RUN cd models/controlnet && \
 # RUN cd models/inpaint && \
 #     wget -O "Places_512_FullData_G.pth" https://github.com/Sanster/models/releases/download/add_mat/Places_512_FullData_G.pth
 
-# Install runpod and requests
-RUN pip install runpod requests pyOpenSSL
+# Install Python dependencies
+RUN pip install --no-cache-dir \
+    runpod \
+    requests \
+    pyOpenSSL \
+    cryptography \
+    urllib3 \
+    websockets
 
 # Return to root directory
 WORKDIR /
