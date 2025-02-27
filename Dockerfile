@@ -23,11 +23,12 @@ RUN apt-get update && apt-get install -y \
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install comfy-cli
-RUN pip install comfy-cli
-
 # Install ComfyUI
-RUN yes | comfy --workspace /comfyui install --cuda-version 11.8 --nvidia --version 0.2.7
+WORKDIR /
+RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui && \
+    cd /comfyui && \
+    pip install -r requirements.txt && \
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 # Set working directory to ComfyUI
 WORKDIR /comfyui
