@@ -85,8 +85,6 @@ RUN cd models/controlnet && \
 RUN pip install --no-cache-dir \
     runpod \
     requests \
-    pyOpenSSL \
-    cryptography \
     urllib3 \
     websockets
 
