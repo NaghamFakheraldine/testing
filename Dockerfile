@@ -97,18 +97,18 @@ COPY handler.py /comfyui/handler.py
 COPY GO_T2I_Workflow.json /comfyui/GO_T2I_Workflow.json
 RUN chmod +x /start.sh
 
-# Use ARG for AWS credentials
+# Stage 2: Model downloader
+FROM base as downloader
+
+# AWS credentials as build arguments
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
-ARG AWS_DEFAULT_REGION
-
-# Download models from S3 if credentials are provided
-# Use ARG for AWS credentials with default empty values
-ARG AWS_ACCESS_KEY_ID=""
-ARG AWS_SECRET_ACCESS_KEY=""
 ARG AWS_DEFAULT_REGION="us-east-1"
 
-# Download models from S3 if credentials are provided
+# Install AWS CLI
+RUN apt-get update && apt-get install -y awscli
+
+# Download models from S3
 WORKDIR /comfyui
 RUN cd models/loras && \
     if [ -n "${AWS_ACCESS_KEY_ID}" ] && [ -n "${AWS_SECRET_ACCESS_KEY}" ]; then \
@@ -119,9 +119,15 @@ RUN cd models/loras && \
         echo "Successfully downloaded from S3" || \
         echo "Failed to download from S3: $?"; \
     else \
-        echo "AWS credentials not provided (ACCESS_KEY: ${#AWS_ACCESS_KEY_ID} chars, SECRET_KEY: ${#AWS_SECRET_ACCESS_KEY} chars)"; \
+        echo "AWS credentials not provided"; \
     fi
-    
+
+# Stage 3: Final image
+FROM base as final
+
+# Copy models from downloader stage
+COPY --from=downloader /comfyui/models /comfyui/models
+
 # Set the start script as the container's entry point
 CMD ["/start.sh"]
 
